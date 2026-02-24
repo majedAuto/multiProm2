@@ -1,0 +1,29 @@
+{
+  "input": {
+    "input_columns": ["text"]
+  },
+  "prompt": {
+    "instruction_mode": "per_row",
+    "instruction_column": "instructions",
+    "user_template": "{instruction}\n\nالبيانات:\n{input}\n\nأعد الإخراج JSON فقط."
+  },
+  "model": {
+    "provider": "mock",
+    "model": "mock-1"
+  },
+  "concurrency": {
+    "global_concurrency": 10,
+    "provider_concurrency": 10
+  },
+  "rows": {
+    "status_column": "status",
+    "error_column": "error",
+    "raw_output_column": "output_raw",
+    "skip_completed": true
+  },
+  "output": {
+    "split_mode": "json",
+    "strict_parse": false
+  }
+}
+

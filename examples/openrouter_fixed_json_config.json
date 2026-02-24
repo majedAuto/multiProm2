@@ -1,0 +1,36 @@
+{
+  "input": {
+    "input_columns": ["customer_comment", "product_name"],
+    "include_column_labels": true
+  },
+  "prompt": {
+    "instruction_mode": "fixed",
+    "fixed_instruction": "حلل النص وأعد JSON فقط بالمفاتيح: summary, sentiment, topic, priority",
+    "system_prompt": "أنت محلل بيانات أعمال. لا تضف أي شرح خارج JSON.",
+    "user_template": "{instruction}\n\nالبيانات:\n{input}"
+  },
+  "model": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4.1-mini",
+    "temperature": 0.1,
+    "timeout_seconds": 90,
+    "retries": 2
+  },
+  "concurrency": {
+    "global_concurrency": 30,
+    "provider_concurrency": 15
+  },
+  "rows": {
+    "sheet_name": "Sheet1",
+    "start_row": 2,
+    "status_column": "status",
+    "error_column": "error",
+    "raw_output_column": "output_raw",
+    "skip_completed": true
+  },
+  "output": {
+    "split_mode": "json",
+    "strict_parse": false
+  }
+}
+
