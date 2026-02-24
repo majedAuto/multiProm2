@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,13 +16,12 @@ class Settings(BaseSettings):
     default_provider_concurrency: int = 10
     request_timeout_seconds: float = 120.0
 
-    openai_api_key: str | None = None
-    openrouter_api_key: str | None = None
-    openrouter_http_referer: str | None = None
-    openrouter_app_title: str | None = None
+    openai_api_key: Optional[str] = None
+    openrouter_api_key: Optional[str] = None
+    openrouter_http_referer: Optional[str] = None
+    openrouter_app_title: Optional[str] = None
 
 
 settings = Settings()
 settings.data_dir.mkdir(parents=True, exist_ok=True)
 settings.output_dir.mkdir(parents=True, exist_ok=True)
-

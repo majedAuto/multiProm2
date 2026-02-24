@@ -5,7 +5,9 @@
 ## المميزات
 
 - تنفيذ متوازي للصفوف (`asyncio` + worker pool)
+- واجهة عربية واضحة بالأيقونات (`/`)
 - اختيار المزود: `OpenRouter` / `OpenAI` / `OpenAI-compatible` / `mock`
+- تحميل قائمة نماذج OpenRouter تلقائيًا داخل الواجهة واختيار النموذج من القائمة
 - دعم تعليمات ثابتة أو تعليمات لكل صف أو هجينة
 - دعم اختيار النموذج لكل صف عبر `model_column`
 - قراءة وكتابة `xlsx` و `csv`
@@ -210,9 +212,22 @@ OPENROUTER_APP_TITLE=Parallel Spreadsheet AI
 
 - `GET /health`
 - `GET /providers/presets`
+- `GET /providers/openrouter/models`
 - `POST /jobs/run-file`
 - `POST /jobs/run-path`
 - `GET /jobs`
 - `GET /jobs/{job_id}`
 - `POST /jobs/{job_id}/cancel`
 - `GET /jobs/{job_id}/download`
+
+## المخرجات المتقدمة (جديد)
+
+يمكنك الآن تحديد مكان كتابة المخرجات داخل Excel من الواجهة أو عبر JSON:
+
+- `output.output_file_name`: اسم ملف الإخراج
+- `output.target_sheet_name`: اسم ورقة الإخراج
+- `output.target_start_row`: صف بداية الكتابة (صف العناوين إذا كان `write_headers=true`)
+- `output.target_start_column`: عمود البداية (`H` أو `8`)
+- `output.export_columns`: الأعمدة التي تريد تصديرها فقط (مثل `status,error,summary`)
+
+إذا لم تحدد هذه الخيارات، سيبقى السلوك الافتراضي كما هو (كتابة الملف الناتج بالشكل الكامل).

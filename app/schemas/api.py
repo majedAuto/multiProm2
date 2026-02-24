@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -34,7 +34,7 @@ class ProviderType(str, Enum):
 
 class InputConfig(BaseModel):
     input_columns: list[str] = Field(default_factory=list)
-    input_template: str | None = None
+    input_template: Optional[str] = None
     input_joiner: str = "\n"
     include_column_labels: bool = True
 
@@ -47,10 +47,10 @@ class InputConfig(BaseModel):
 
 class PromptConfig(BaseModel):
     instruction_mode: InstructionMode = InstructionMode.fixed
-    fixed_instruction: str | None = None
-    instruction_column: str | None = None
-    system_prompt: str | None = None
-    system_prompt_column: str | None = None
+    fixed_instruction: Optional[str] = None
+    instruction_column: Optional[str] = None
+    system_prompt: Optional[str] = None
+    system_prompt_column: Optional[str] = None
     user_template: str = "{instruction}\n\n{input}"
     first_row_instruction_scope_all_rows: bool = True
 
@@ -58,14 +58,14 @@ class PromptConfig(BaseModel):
 class ModelConfig(BaseModel):
     provider: ProviderType = ProviderType.openrouter
     model: str
-    model_column: str | None = None
-    api_key: str | None = None
-    base_url: str | None = None
+    model_column: Optional[str] = None
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
     headers: dict[str, str] = Field(default_factory=dict)
-    temperature: float | None = None
-    max_tokens: int | None = None
-    top_p: float | None = None
-    timeout_seconds: float | None = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+    top_p: Optional[float] = None
+    timeout_seconds: Optional[float] = None
     retries: int = 2
 
 
@@ -75,9 +75,9 @@ class ConcurrencyConfig(BaseModel):
 
 
 class RowConfig(BaseModel):
-    sheet_name: str | None = None
-    start_row: int | None = None
-    end_row: int | None = None
+    sheet_name: Optional[str] = None
+    start_row: Optional[int] = None
+    end_row: Optional[int] = None
     status_column: str = "status"
     error_column: str = "error"
     raw_output_column: str = "output_raw"
@@ -89,10 +89,16 @@ class OutputConfig(BaseModel):
     split_mode: SplitMode = SplitMode.none
     delimiter: str = "||"
     output_columns: list[str] = Field(default_factory=list)
-    json_prefix: str | None = None
+    export_columns: list[str] = Field(default_factory=list)
+    json_prefix: Optional[str] = None
     strict_parse: bool = False
     write_raw_output: bool = True
     overwrite_existing_split_columns: bool = True
+    output_file_name: Optional[str] = None
+    target_sheet_name: Optional[str] = None
+    target_start_row: Optional[int] = None
+    target_start_column: Optional[str] = None
+    write_headers: bool = True
 
 
 class RunConfig(BaseModel):
@@ -126,26 +132,25 @@ class RowResult(BaseModel):
     index: int
     sheet_row_number: int
     status: str
-    error: str | None = None
-    raw_output: str | None = None
-    parsed_output: dict[str, Any] | None = None
+    error: Optional[str] = None
+    raw_output: Optional[str] = None
+    parsed_output: Optional[dict[str, Any]] = None
 
 
 class JobRecord(BaseModel):
     id: str
     state: JobState
     source_file: str
-    output_file: str | None = None
+    output_file: Optional[str] = None
     created_at: str
-    started_at: str | None = None
-    finished_at: str | None = None
+    started_at: Optional[str] = None
+    finished_at: Optional[str] = None
     config: RunConfig
     progress: JobProgress = Field(default_factory=JobProgress)
-    error: str | None = None
+    error: Optional[str] = None
     rows: list[RowResult] = Field(default_factory=list)
 
 
 class CreateJobFromPathRequest(BaseModel):
     file_path: str
     config: RunConfig
-

@@ -4,9 +4,9 @@ import asyncio
 import json
 import shutil
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import UploadFile
 
@@ -14,7 +14,7 @@ from app.config import settings
 from app.providers.factory import build_provider
 from app.schemas.api import FileType, JobRecord, JobState, RunConfig
 from app.services.orchestrator import ParallelRowProcessor
-from app.services.spreadsheet import detect_file_type, load_dataframe, save_dataframe
+from app.services.spreadsheet import detect_file_type, load_dataframe, save_processed_output
 
 
 class JobManager:
@@ -85,6 +85,7 @@ class JobManager:
             source_path = Path(job.source_file)
             file_type = detect_file_type(source_path, FileType.auto)
             df = load_dataframe(source_path, file_type=file_type, sheet_name=job.config.rows.sheet_name)
+            original_columns = list(df.columns)
 
             provider = build_provider(job.config.model)
             processor = ParallelRowProcessor(provider, job.config)
@@ -107,8 +108,18 @@ class JobManager:
                 job.rows.extend(row_results[:5000])
 
             out_ext = source_path.suffix.lower() if source_path.suffix.lower() in {".csv", ".xlsx"} else ".xlsx"
-            out_file = settings.output_dir / f"{job_id}_output{out_ext}"
-            save_dataframe(df, out_file, file_type=file_type, sheet_name=job.config.rows.sheet_name)
+            output_name = _resolve_output_file_name(job_id, job.config.output.output_file_name, out_ext)
+            out_file = settings.output_dir / output_name
+            save_processed_output(
+                df=df,
+                source_path=source_path,
+                output_path=out_file,
+                file_type=file_type,
+                source_sheet_name=job.config.rows.sheet_name,
+                output_cfg=job.config.output,
+                row_cfg=job.config.rows,
+                original_columns=original_columns,
+            )
             job.output_file = str(out_file)
             job.state = JobState.completed
             job.finished_at = _now_iso()
@@ -125,7 +136,18 @@ class JobManager:
 
 
 def _now_iso() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _resolve_output_file_name(job_id: str, requested_name: Optional[str], default_ext: str) -> str:
+    if not requested_name:
+        return f"{job_id}_output{default_ext}"
+    safe_name = Path(requested_name).name.strip()
+    if not safe_name:
+        return f"{job_id}_output{default_ext}"
+    if not Path(safe_name).suffix:
+        safe_name = f"{safe_name}{default_ext}"
+    return safe_name
 
 
 job_manager = JobManager()

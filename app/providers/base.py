@@ -2,23 +2,23 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 
 @dataclass
 class ChatRequest:
     model: str
     messages: list[dict[str, str]]
-    temperature: float | None = None
-    max_tokens: int | None = None
-    top_p: float | None = None
-    timeout_seconds: float | None = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+    top_p: Optional[float] = None
+    timeout_seconds: Optional[float] = None
 
 
 @dataclass
 class ChatResponse:
     content: str
-    raw: dict[str, Any] | None = None
+    raw: Optional[dict[str, Any]] = None
 
 
 class BaseChatProvider(ABC):
@@ -27,4 +27,3 @@ class BaseChatProvider(ABC):
     @abstractmethod
     async def chat(self, req: ChatRequest) -> ChatResponse:
         raise NotImplementedError
-

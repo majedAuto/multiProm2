@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 
@@ -72,7 +72,7 @@ def resolve_instruction(row: pd.Series, all_rows: pd.DataFrame, run_cfg: RunConf
     return ""
 
 
-def resolve_system_prompt(row: pd.Series, run_cfg: RunConfig) -> str | None:
+def resolve_system_prompt(row: pd.Series, run_cfg: RunConfig) -> Optional[str]:
     cfg = run_cfg.prompt
     parts: list[str] = []
     if cfg.system_prompt:
@@ -102,4 +102,3 @@ def build_messages(row: pd.Series, all_rows: pd.DataFrame, run_cfg: RunConfig) -
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": user_content})
     return messages
-

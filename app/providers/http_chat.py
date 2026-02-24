@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -16,8 +16,8 @@ class OpenAICompatibleProvider(BaseChatProvider):
         name: str,
         base_url: str,
         api_key: str,
-        default_headers: dict[str, str] | None = None,
-        client: httpx.AsyncClient | None = None,
+        default_headers: Optional[dict[str, str]] = None,
+        client: Optional[httpx.AsyncClient] = None,
     ) -> None:
         self.name = name
         self.base_url = base_url.rstrip("/")
@@ -95,4 +95,3 @@ class MockProvider(BaseChatProvider):
         else:
             content = f"[{req.model}] {user_content[:200]}"
         return ChatResponse(content=content, raw={"mock": True})
-

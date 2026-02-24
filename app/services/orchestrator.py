@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import pandas as pd
 
@@ -31,7 +31,7 @@ class ParallelRowProcessor:
         df: pd.DataFrame,
         progress: JobProgress,
         cancel_event: asyncio.Event,
-        on_row_done: Callable[[RowResult], None] | None = None,
+        on_row_done: Optional[Callable[[RowResult], None]] = None,
     ) -> tuple[pd.DataFrame, list[RowResult]]:
         target_indices, initially_skipped = self._target_indices(df)
         progress.total_rows = len(target_indices)
@@ -90,7 +90,7 @@ class ParallelRowProcessor:
         progress: JobProgress,
         cancel_event: asyncio.Event,
         results: list[RowResult],
-        on_row_done: callable | None,
+        on_row_done: Optional[Callable[[RowResult], None]],
     ) -> None:
         while True:
             idx = await queue.get()
@@ -139,7 +139,7 @@ class ParallelRowProcessor:
             )
             text = await self._chat_with_retries(req)
             split_values: dict[str, Any] = {}
-            parse_error: str | None = None
+            parse_error: Optional[str] = None
             if self.run_cfg.output.split_mode.value != "none":
                 try:
                     split_values = parse_output_text(text, self.run_cfg.output)
@@ -188,7 +188,7 @@ class ParallelRowProcessor:
 
     async def _chat_with_retries(self, req: ChatRequest) -> str:
         attempts = max(0, self.run_cfg.model.retries) + 1
-        last_exc: Exception | None = None
+        last_exc: Optional[Exception] = None
         for attempt in range(attempts):
             try:
                 async with self.global_sem:

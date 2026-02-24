@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>منصة التحليل المتوازي بالذكاء الاصطناعي</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-a"></div>
+    <div class="bg-shape bg-b"></div>
+
+    <header class="hero">
+      <div class="hero-badge">⚡ تشغيل متوازي • 📊 ملفات Excel/CSV • 🤖 مزودات متعددة</div>
+      <h1>منصة التحليل المتوازي بالذكاء الاصطناعي</h1>
+      <p>
+        واجهة عربية واضحة لإرسال الصفوف بالتوازي إلى النموذج المختار، ثم كتابة النتائج في نفس الملف مع تقسيم اختياري
+        إلى أعمدة.
+      </p>
+      <div class="hero-actions">
+        <button id="btnLoadJobsTop" class="btn ghost">📋 تحديث قائمة المهام</button>
+        <a class="btn ghost" href="/docs" target="_blank" rel="noreferrer">🧪 Swagger API</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel setup-panel">
+        <div class="panel-title">
+          <h2>🛠️ إعداد التشغيل</h2>
+          <span class="muted">ملف + نموذج + تعليمات + مخرجات</span>
+        </div>
+
+        <div class="field-grid two">
+          <label class="field">
+            <span>📥 طريقة الإدخال</span>
+            <select id="sourceMode">
+              <option value="upload">رفع ملف</option>
+              <option value="path">مسار ملف على الجهاز</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>🧠 المزود</span>
+            <select id="provider">
+              <option value="mock">mock (تجربة سريعة)</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="openai">OpenAI</option>
+              <option value="openai_compatible">OpenAI-Compatible</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label class="field" id="uploadField">
+            <span>📎 الملف</span>
+            <input id="fileInput" type="file" accept=".csv,.xlsx" />
+          </label>
+          <label class="field hidden" id="pathField">
+            <span>📁 مسار الملف</span>
+            <input id="filePath" type="text" placeholder="/Users/majd/Desktop/codex/sample.csv" />
+          </label>
+          <label class="field" id="modelTextField">
+            <span>🏷️ اسم النموذج</span>
+            <input id="modelName" type="text" value="mock-1" placeholder="openai/gpt-4.1-mini" />
+          </label>
+          <div class="field hidden" id="openrouterModelField">
+            <span>🛰️ اختر نموذج OpenRouter</span>
+            <div class="stack-v">
+              <input id="openrouterModelSearch" type="text" placeholder="ابحث داخل القائمة..." />
+              <div class="stack-h">
+                <select id="openrouterModelSelect"></select>
+                <button id="btnReloadOpenrouterModels" class="btn ghost" type="button">🔄 تحميل</button>
+              </div>
+              <div id="openrouterModelsHint" class="hint">
+                عند اختيار OpenRouter سيتم تحميل النماذج المتاحة من OpenRouter تلقائيًا.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <details class="box">
+          <summary>🔐 إعدادات مزود إضافية (اختياري)</summary>
+          <div class="field-grid two">
+            <label class="field">
+              <span>🔑 API Key (اختياري)</span>
+              <input id="apiKey" type="password" placeholder="سيستخدم .env إن تُرك فارغًا" />
+            </label>
+            <label class="field">
+              <span>🌐 Base URL (اختياري)</span>
+              <input id="baseUrl" type="text" placeholder="لـ openai_compatible أو تجاوز الافتراضي" />
+            </label>
+          </div>
+        </details>
+
+        <div class="section-head">📄 إعدادات البيانات</div>
+        <div class="field-grid two">
+          <label class="field">
+            <span>🧩 أعمدة الإدخال</span>
+            <input id="inputColumns" type="text" value="text" placeholder="text,product_name" />
+          </label>
+          <label class="field">
+            <span>🧾 قالب الإدخال (اختياري)</span>
+            <input id="inputTemplate" type="text" placeholder="{text} | المنتج: {product_name}" />
+          </label>
+        </div>
+        <div class="field-grid two">
+          <label class="field">
+            <span>📚 اسم الورقة (Excel فقط)</span>
+            <input id="sheetName" type="text" placeholder="Sheet1" />
+          </label>
+          <label class="field">
+            <span>🧠 النموذج لكل صف (اختياري)</span>
+            <input id="modelColumn" type="text" placeholder="model" />
+          </label>
+        </div>
+
+        <div class="section-head">✍️ التعليمات (Prompts)</div>
+        <div class="field-grid two">
+          <label class="field">
+            <span>🎛️ وضع التعليمات</span>
+            <select id="instructionMode">
+              <option value="fixed">تعليمات ثابتة</option>
+              <option value="per_row">تعليمات لكل صف</option>
+              <option value="hybrid">ثابتة + لكل صف</option>
+              <option value="first_row_as_fixed">أول صف كتعليمات ثابتة</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>📌 عمود التعليمات</span>
+            <input id="instructionColumn" type="text" value="instructions" placeholder="instructions" />
+          </label>
+        </div>
+        <label class="field">
+          <span>📝 التعليمات الثابتة (من الواجهة - بدون Excel)</span>
+          <textarea
+            id="fixedInstruction"
+            rows="3"
+            placeholder="حلل النص وأعد JSON فقط بالمفاتيح: summary, sentiment, category"
+          ></textarea>
+        </label>
+        <label class="field">
+          <span>🧭 System Prompt (اختياري)</span>
+          <textarea id="systemPrompt" rows="2" placeholder="أنت محلل بيانات. لا تضف شرحًا خارج JSON."></textarea>
+        </label>
+        <label class="field">
+          <span>🧱 User Template</span>
+          <textarea id="userTemplate" rows="4">{instruction}
+
+البيانات:
+{input}
+
+أعد الإخراج بصيغة JSON فقط.</textarea>
+        </label>
+
+        <div class="section-head">📤 المخرجات وتقسيم الأعمدة</div>
+        <div class="field-grid three">
+          <label class="field">
+            <span>🪄 وضع التقسيم</span>
+            <select id="splitMode">
+              <option value="none">بدون تقسيم</option>
+              <option value="json" selected>JSON</option>
+              <option value="delimiter">Delimiter</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>➗ الفاصل</span>
+            <input id="delimiter" type="text" value="||" />
+          </label>
+          <label class="field">
+            <span>🧷 أعمدة الإخراج (اختياري)</span>
+            <input id="outputColumns" type="text" placeholder="summary,sentiment,category" />
+          </label>
+        </div>
+
+        <details class="box">
+          <summary>🗂️ توجيه المخرجات (Excel/CSV)</summary>
+          <div class="field-grid two">
+            <label class="field">
+              <span>📄 اسم ملف الإخراج (اختياري)</span>
+              <input id="outputFileName" type="text" placeholder="analysis_result.xlsx" />
+            </label>
+            <label class="field">
+              <span>📚 ورقة الإخراج (Excel فقط - اختياري)</span>
+              <input id="targetSheetName" type="text" placeholder="Results" />
+            </label>
+          </div>
+          <div class="field-grid three">
+            <label class="field">
+              <span>🔢 بداية صف الكتابة (صف العناوين)</span>
+              <input id="targetStartRow" type="number" min="1" placeholder="1" />
+            </label>
+            <label class="field">
+              <span>🔤 بداية عمود الكتابة</span>
+              <input id="targetStartColumn" type="text" placeholder="H أو 8" />
+            </label>
+            <label class="field checkbox">
+              <input id="writeHeaders" type="checkbox" checked />
+              <span>🏷️ كتابة عناوين الأعمدة</span>
+            </label>
+          </div>
+          <label class="field">
+            <span>📦 أعمدة التصدير للمخرجات (اختياري)</span>
+            <input
+              id="exportColumns"
+              type="text"
+              placeholder="status,error,output_raw,summary,sentiment"
+            />
+          </label>
+          <div class="hint">
+            إذا حددت ورقة/صف/عمود إخراج فسيكتب النظام المخرجات في المكان المحدد داخل ملف Excel بدل إعادة كتابة الورقة كاملة.
+          </div>
+        </details>
+
+        <div class="section-head">⚙️ الأداء والتحكم</div>
+        <div class="field-grid four">
+          <label class="field">
+            <span>🚀 توازي عام</span>
+            <input id="globalConcurrency" type="number" min="1" value="10" />
+          </label>
+          <label class="field">
+            <span>🧰 توازي المزود</span>
+            <input id="providerConcurrency" type="number" min="1" value="10" />
+          </label>
+          <label class="field">
+            <span>🌡️ Temperature</span>
+            <input id="temperature" type="number" step="0.1" placeholder="0.1" />
+          </label>
+          <label class="field">
+            <span>🔁 عدد المحاولات</span>
+            <input id="retries" type="number" min="0" value="2" />
+          </label>
+        </div>
+        <div class="field-grid four">
+          <label class="field">
+            <span>▶️ من الصف (Excel)</span>
+            <input id="startRow" type="number" min="1" placeholder="2" />
+          </label>
+          <label class="field">
+            <span>⏹️ إلى الصف (Excel)</span>
+            <input id="endRow" type="number" min="1" placeholder="فارغ = حتى النهاية" />
+          </label>
+          <label class="field checkbox">
+            <input id="skipCompleted" type="checkbox" checked />
+            <span>⏭️ تخطي الصفوف المكتملة</span>
+          </label>
+          <label class="field checkbox">
+            <input id="strictParse" type="checkbox" />
+            <span>🧪 فشل عند خطأ Parsing</span>
+          </label>
+        </div>
+
+        <details class="box">
+          <summary>🧾 أسماء أعمدة الحالة (اختياري)</summary>
+          <div class="field-grid three">
+            <label class="field">
+              <span>حالة</span>
+              <input id="statusColumn" type="text" value="status" />
+            </label>
+            <label class="field">
+              <span>خطأ</span>
+              <input id="errorColumn" type="text" value="error" />
+            </label>
+            <label class="field">
+              <span>مخرج خام</span>
+              <input id="rawOutputColumn" type="text" value="output_raw" />
+            </label>
+          </div>
+        </details>
+
+        <div class="action-row">
+          <button id="applyMockPreset" class="btn ghost">🧪 تعبئة قالب Mock</button>
+          <button id="applyOpenRouterPreset" class="btn ghost">🛰️ تعبئة قالب OpenRouter</button>
+          <button id="btnRun" class="btn primary">▶️ تشغيل المهمة</button>
+        </div>
+
+        <label class="field">
+          <span>🔍 معاينة JSON (للتأكد قبل التشغيل)</span>
+          <textarea id="configPreview" rows="10" readonly></textarea>
+        </label>
+      </section>
+
+      <section class="panel monitor-panel">
+        <div class="panel-title">
+          <h2>📡 متابعة التنفيذ</h2>
+          <span class="muted">المهام الحالية والتنزيل</span>
+        </div>
+
+        <div class="status-box">
+          <div id="flashMessage" class="flash neutral">جاهز للتشغيل</div>
+          <div class="inline-actions">
+            <label class="field compact">
+              <span>🆔 رقم المهمة</span>
+              <input id="jobIdInput" type="text" placeholder="يُملأ تلقائيًا بعد التشغيل" />
+            </label>
+            <button id="btnRefreshJob" class="btn ghost">🔄 تحديث المهمة</button>
+            <button id="btnPollToggle" class="btn ghost">⏱️ بدء المراقبة</button>
+            <button id="btnDownloadJob" class="btn secondary">⬇️ تنزيل الناتج</button>
+          </div>
+        </div>
+
+        <div class="job-summary" id="jobSummary">
+          <div class="empty-state">لا توجد مهمة محددة بعد. شغّل مهمة أو أدخل رقم مهمة.</div>
+        </div>
+
+        <div class="jobs-header">
+          <h3>📚 قائمة المهام</h3>
+          <button id="btnLoadJobs" class="btn ghost">🔃 تحديث</button>
+        </div>
+        <div id="jobsList" class="jobs-list">
+          <div class="empty-state">لم يتم تحميل قائمة المهام بعد.</div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/ui/app.js"></script>
+  </body>
+  </html>
